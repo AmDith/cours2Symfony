@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+{% block main %}
+<div class="custom-class >
+    <div class="border rounded-lg shadow-lg border px-4">
+     <div class="bg-gray-100 px-4 py-2 font-semibold text-lg">Liste de articles</div>
+        <div class="p-4">
+        <div class="flex justify-end mb-2">
+            <a href="#" role="button" class="border border-gray-800 text-gray-800 hover:bg-gray-800 hover:text-white font-semibold py-2 px-4 rounded">
+                Create
+            </a>
+        </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-300">
+                    <thead>
+                    <tr class="bg-gray-200">
+                        <th class="border px-4 py-2 text-left">#</th>
+                        <th class="border px-4 py-2 text-left">Reference</th>
+                        <th class="border px-4 py-2 text-left">Libelle</th>
+                        <th class="border px-4 py-2 text-left">Qte Stock</th>
+                        <th class="border px-4 py-2 text-left">Prix</th>
+                        <th class="border px-4 py-2 text-left">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td class="border px-4 py-5">R1C1</td>
+                        <td class="border px-4 py-5">R1C2</td>
+                        <td class="border px-4 py-5">R1C3</td>
+                        <td class="border px-4 py-5">R1C4</td>
+                        <td class="border px-4 py-5">R1C5</td>
+                        <td class="border px-4 py-5 text-center space-x-2">
+                            <a href="#" role="button" class="border border-gray-800 text-gray-800 hover:bg-gray-800 hover:text-white font-semibold py-2 px-4 rounded">
+                                Detail
+                            </a>
+                            <a href="#" role="button" class="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white font-semibold py-2 px-4 rounded">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                </div>
+                <nav aria-label="Page navigation" class="flex justify-end mt-4">
+                    <ul class="flex space-x-2">
+                        <li>
+                        <a class="px-3 py-1 text-gray-500 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50" href="#" aria-label="Previous" aria-disabled="true">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                        </li>
+                        <li>
+                        <a class="px-3 py-1 text-white bg-blue-600 rounded-md" href="#" aria-current="page">1</a>
+                        </li>
+                        <li>
+                        <a class="px-3 py-1 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300" href="#">2</a>
+                        </li>
+                        <li>
+                        <a class="px-3 py-1 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300" href="#">3</a>
+                        </li>
+                        <li>
+                        <a class="px-3 py-1 text-gray-500 bg-gray-200 rounded-md hover:bg-gray-300" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                        </li>
+                    </ul>
+                    </nav>
+
+
+            </div>
+     </div
+</div>
+{%  endblock %}
+
+

@@ -4,11 +4,12 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\HasLifecycleCallbacks] // Indique que l'entité utilise des callbacks
-class User
+class User implements PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -50,6 +51,13 @@ class User
     public function onPreUpdate(): void
     {
         $this->updateAt = new \DateTimeImmutable();
+    }
+
+    public function __construct()
+    {
+        $this->createAt = new \DateTimeImmutable();
+        $this->updateAt = new \DateTimeImmutable();
+        $this->isBlocked = false;
     }
 
     public function getId(): ?int

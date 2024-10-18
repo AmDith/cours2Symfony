@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block main %}
+<div class="custom-class">
+    <div class="border rounded-lg shadow-lg border px-4">
+        <div class="bg-gray-100 px-4 py-2 font-semibold text-lg">Enregistrements d'un user</div>
+        <div class="mt-2">
+            {{ form_start(formUser) }}
+            {{ form_widget(formUser) }}
+            {{ form_end(formUser) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+

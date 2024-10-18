@@ -24,9 +24,9 @@
         </a>
       </div>
       <div class="search mb-2 flex mt-4 lg:mt-0">
-        {{ form_start(formSearch) }}{#
+        {# {{ form_start(formSearch) }}{#
         <form>
-          #}
+          #} {#
           <div class="mb-2 text-red-500">
             {{ form_errors(formSearch.telephone) }}
           </div>
@@ -39,9 +39,9 @@
             {{ form_widget(formSearch.Search) }}
           </div>
 
-          {{ form_end(formSearch) }}{#
+          {{ form_end(formSearch) }} #} {#
         </form>
-        #}
+        #} #}
       </div>
 
       <div class="overflow-x-auto">
@@ -49,32 +49,22 @@
           <thead>
             <tr class="bg-gray-200">
               <th class="border px-4 py-2 text-left">#</th>
-              <th class="border px-4 py-2 text-left">Nom</th>
-              <th class="border px-4 py-2 text-left">Prenom</th>
-              <th class="border px-4 py-2 text-left">Surname</th>
-              <th class="border px-4 py-2 text-left">Telephone</th>
+              <th class="border px-4 py-2 text-left">Montant</th>
+              <th class="border px-4 py-2 text-left">MontantVerser</th>
               <th class="border px-4 py-2 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {% if clients is iterable %} {% for client in clients %}
+            {% if dettes is iterable %} {% for client in dettes %}
             <tr>
               <td class="border px-4 py-5">{{ client.id }}</td>
               <td class="border px-4 py-5">
-                {{ client.userId ? client.userId.nom : "#" }}
+                {{ client.montant }}
               </td>
               <td class="border px-4 py-5">
-                {{ client.userId ? client.userId.prenom : "#" }}
+                {{ client.montantVerser }}
               </td>
-              <td class="border px-4 py-5">{{ client.Surname }}</td>
-              <td class="border px-4 py-5">{{ client.telephone }}</td>
               <td class="border px-4 py-5 text-center space-x-2">
-                <a
-                  href="{{ path('dettes.index', { clientId: client.id }) }}"
-                  role="button"
-                  class="border border-gray-800 text-gray-800 hover:bg-gray-800 hover:text-white font-semibold py-2 px-4 rounded"
-                  >Dettes</a
-                >
                 <a
                   href="#"
                   role="button"
@@ -83,24 +73,16 @@
                 >
               </td>
             </tr>
-            {% endfor %} {% elseif clients is not empty %}
+            {% endfor %} {% elseif dettes is not empty %}
             <tr>
-              <td class="border px-4 py-5">{{ clients.id }}</td>
+              <td class="border px-4 py-5">{{ dettes.id }}</td>
               <td class="border px-4 py-5">
-                {{ clients.userId ? clients.userId.nom : "#" }}
+                {{ dettes.montant }}
               </td>
               <td class="border px-4 py-5">
-                {{ clients.userId ? clients.userId.prenom : "#" }}
+                {{ dettes.montantVerser }}
               </td>
-              <td class="border px-4 py-5">{{ clients.Surname }}</td>
-              <td class="border px-4 py-5">{{ clients.telephone }}</td>
               <td class="border px-4 py-5 text-center space-x-2">
-                <a
-                  href="{{ path('dettes.index', { clientId: client.id }) }}"
-                  role="button"
-                  class="border border-gray-800 text-gray-800 hover:bg-gray-800 hover:text-white font-semibold py-2 px-4 rounded"
-                  >Dettes</a
-                >
                 <a
                   href="#"
                   role="button"

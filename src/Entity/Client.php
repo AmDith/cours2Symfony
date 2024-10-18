@@ -7,7 +7,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
+//Validation du formulaire pour l'unicité
+#[UniqueEntity('telephone', message:'Le téléphone doit  être unique')]
+#[UniqueEntity('Surname', message:'Le surmane doit  être unique')]
 class Client
 {
     #[ORM\Id]
@@ -15,10 +22,14 @@ class Client
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 13)]
+    #[ORM\Column(length: 13,  unique: true)]
     private ?string $telephone = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 50,  unique: true)]
+    //validation sur un entité si le formType est relier à l'entité
+    #[Assert\NotBlank(
+        message: 'Le surname du client est obligatoire',
+    )]
     private ?string $Surname = null;
 
     #[ORM\Column(length: 100)]
@@ -36,11 +47,13 @@ class Client
     /**
      * @var Collection<int, Dette>
      */
-    #[ORM\OneToMany(targetEntity: Dette::class, mappedBy: 'client', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Dette::class, mappedBy: 'client', orphanRemoval: true, cascade:['persist'])]
     private Collection $dettes;
 
     public function __construct()
     {
+        $this->createAt = new \DateTimeImmutable();
+        $this->updateAt = new \DateTimeImmutable();
         $this->dettes = new ArrayCollection();
     }
 

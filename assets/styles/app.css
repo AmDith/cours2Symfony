@@ -15,3 +15,27 @@
   justify-content: center;
   box-sizing: border-box;
 }
+
+.account-toggle {
+  transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.account-toggle.open {
+  max-height: 500px; /* ajuster selon la taille de ton formulaire */
+  opacity: 1;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  width: 30px;
+  height: 16px;
+}

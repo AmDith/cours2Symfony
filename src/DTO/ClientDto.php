@@ -1,25 +1,16 @@
 <?php
 
-namespace App\DTO\Entity;
+namespace App\DTO;
 
 
-class ClientSearch
+class ClientDto
 {
     
-
-  
     private string $telephone;
+    private ?string $Surname ;
+    private bool $createAt = false;
 
-    
-    private string $Surname;
-
-    
-
-    public function __construct()
-    {
-    }
-
-    public function getTelephone(): string
+    public function getTelephone(): ?string
     {
         return $this->telephone;
     }
@@ -31,7 +22,7 @@ class ClientSearch
         return $this;
     }
 
-    public function getSurname(): string
+    public function getSurname(): ?string
     {
         return $this->Surname;
     }
@@ -43,4 +34,5 @@ class ClientSearch
         return $this;
     }
 
+   
 }

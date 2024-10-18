@@ -1,0 +1,10 @@
+{# templates/components/client_live.html.twig #}
+
+<div>
+  {% if component.getClient() %}
+  <p>Nom: {{ component.getClient().name }}</p>
+  <p>Téléphone: {{ component.getClient().telephone }}</p>
+  {# Ajouter d'autres informations #} {% else %}
+  <p>Aucun client trouvé avec ce numéro de téléphone.</p>
+  {% endif %}
+</div>

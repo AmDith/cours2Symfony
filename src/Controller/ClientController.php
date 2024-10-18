@@ -2,20 +2,23 @@
 
 namespace App\Controller;
 
+use App\DTO\ClientDto;
 use App\Entity\Client;
 use App\Form\ClientType;
+use App\Form\InfoClientType;
+use App\Form\SearchClientType;
 use App\Repository\ClientRepository;
-use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ClientController extends AbstractController
 {
-    #[Route('/clients', name: 'clients.index', methods: ['GET'])]
-    public function index(ClientRepository $clientRepository): Response
+    #[Route('/clients', name: 'clients.index', methods: ['GET','POST'])]
+    public function index(ClientRepository $clientRepository, Request $request): Response
     {
         /*
             Les methodes de repository permet de récupérer les données d'une entité
@@ -25,9 +28,28 @@ class ClientController extends AbstractController
 
 
         */
-        $clients=$clientRepository->findAll();
+        $formSearch=$this->createForm(SearchClientType::class);
+        $formSearch->handleRequest($request);
+        $page =  $request->query->getInt('page',1);
+        $count = 0;
+        $maxPage =  0;
+        $limit = 8;
+        if ($formSearch->isSubmitted($request) && $formSearch->isValid()) {
+            //c'est ici qu'on filtre par téléphone
+            $clients = $clientRepository->findBy(['telephone' => $formSearch->get('telephone')->getData()]);
+            $maxPage = 1;
+        }else{
+            $clients = $clientRepository->paginateClients($page,$limit);
+            $count = $clients->count();
+            $maxPage = ceil($count/$limit);
+        }
+
+        
         return $this->render('client/index.html.twig', [
-            'clients' => $clients
+            'clients' => $clients,
+            'formSearch' => $formSearch->createView(),
+            'page' => $page,//page actuelle
+            'maxPage' => $maxPage,
         ]);
     }
     //parametre facultative {va?}
@@ -48,17 +70,36 @@ class ClientController extends AbstractController
     //{} path variable
 
     //utilisation des query params
-    #[Route('/clients/search/telephone', name: 'clients.searchClientByTelephone', methods: ['POST'])]
-    public function searchClientByTelephone(Request $request, ClientRepository $clientRepository): Response
+    #[Route('/clients/search/telephone', name: 'clients.searchClientByTelephone', methods: ['GET','POST'])]
+    public function searchClientByTelephone(Request $request, ClientRepository $clientRepository,SessionInterface $session, ClientDto  $clientDto): Response
     {
         //query=>$_GET
         //request=>$_POST
         //$request->query-> get('key')=>$_GET['key']
         //$request->request-> get('name_field')=>$_POST['name_field']
         // $telephone = $request->query-> get('tel');
-        $clients = $clientRepository->findOneBy(['telephone' =>$request->request-> get('telephone')]);
-        return $this->render('client/index.html.twig', [
-            'clients' => $clients
+        // $clients = $clientRepository->findOneBy(['telephone' =>$request->request-> get('telephone')]);
+
+        //Récupérer le téléphone depuis la session
+        $telephone = $session->get('telephone');
+        $clients = [];
+        $fieljson =  json_decode($telephone, true);
+        $formInfoClient=$this->createForm(InfoClientType::class);
+        $formInfoClient->handleRequest($request);
+        if ($formInfoClient->isSubmitted($request) && $formInfoClient->isValid()) {
+            if ($telephone){
+                $clientDto->$this->telephone->setTelephone($formInfoClient->get('telephone')->getData());
+                $clients = $clientRepository->findOneBy($clientDto->$this->telephone->getTelephone());
+                $fieljson = $this->json([
+                    'status' => 'success',
+                    'clients' => $clients,
+                ]);
+            }
+         }
+        return $this->render('client/form2.html.twig', [
+            'formInfoClient' => $formInfoClient->createView(),
+            'clients' => $clients,
+            'fieljson' =>  $fieljson
         ]);
     }
 
@@ -84,14 +125,15 @@ class ClientController extends AbstractController
         //Récupération des données du formulaire
         $form->handleRequest($request);
        
-        if ($form->isSubmitted()) {
-            $client->setCreateAt(new \DateTimeImmutable());
-            $client->setUpdateAt(new \DateTimeImmutable());
+        if ($form->isSubmitted() && $form->isValid()) {
+            // il est bon de faire l'instanciation de create-At et update_At dans le constructeur
+            // $client->setCreateAt(new \DateTimeImmutable());
+            // $client->setUpdateAt(new \DateTimeImmutable());
 
             $entityManager->persist($client);//Stocker en mémoire mais n'est pas encore exécuté au niveau de la base de donnée
             $entityManager->flush();//exécute la requête en base de donnée et est l'équivalent du commit en java
 
-            return $this->redirectToRoute('Clients.index');
+            return $this->redirectToRoute('clients.index');
         }
         return $this->render('client/form.html.twig', [
             'formClient' => $form->createView(),

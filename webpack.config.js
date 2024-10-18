@@ -14,6 +14,7 @@ Encore
   // only needed for CDN's or subdirectory deploy
   //.setManifestKeyPrefix('build/')
 
+  .enableStimulusBridge("./assets/controllers.json")
   /*
    * ENTRY CONFIG
    *
@@ -56,7 +57,8 @@ Encore
 
   // enables Sass/SCSS support
   //.enableSassLoader()
-
+  //ajouter le style
+  //.addStyleEntry("apps", "./assets/css/app.css")
   // Define an alias for the controllers.json file with the exact path
   .addAliases({
     "@symfony/stimulus-bridge/controllers.json":

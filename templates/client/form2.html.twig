@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %} {% block main %}
+<div class="custom-class">
+  <div class="border rounded-lg shadow-lg border px-4">
+    <div class="bg-gray-100 px-4 py-2 font-semibold text-lg">
+      Recherche info d'un client
+    </div>
+    <div class="mt-2">
+      {{
+        form_start(formInfoClient, {
+          attr: {
+            id: "form-client-info"
+          }
+        })
+      }}
+
+      <div class="mb-2 text-red-500">
+        {{ form_errors(formInfoClient.telephone) }}
+      </div>
+      <div class="flex mt-4 lg:mt-0">
+        {{
+          form_widget(formInfoClient.telephone, {
+            attr: {
+              "data-controller": "live",
+              "data-action": "input->live#update"
+            }
+          })
+        }}
+      </div>
+
+      {{ form_end(formInfoClient) }}
+
+      <!-- Champs supplémentaires pour la création de compte -->
+      <div id="accountFields" class="mt-4">
+        {# Utilisation du Live Component #}
+        <div
+          data-controller="live"
+          data-live-name-value="Dynamic"
+          data-live-telephone-value="{{ formInfoClient.telephone.vars.value }}"
+        >
+          {# Le contenu du composant Live sera mis à jour automatiquement #}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

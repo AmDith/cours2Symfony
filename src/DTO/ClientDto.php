@@ -7,10 +7,9 @@ class ClientDto
 {
     
     private string $telephone;
-    private ?string $Surname ;
-    private bool $createAt = false;
+    private string $surname ;
 
-    public function getTelephone(): ?string
+    public function getTelephone(): string
     {
         return $this->telephone;
     }
@@ -22,14 +21,14 @@ class ClientDto
         return $this;
     }
 
-    public function getSurname(): ?string
+    public function getSurname(): string
     {
-        return $this->Surname;
+        return $this->surname;
     }
 
-    public function setSurname(string $Surname): static
+    public function setSurname(string $surname): static
     {
-        $this->Surname = $Surname;
+        $this->surname = $surname;
 
         return $this;
     }

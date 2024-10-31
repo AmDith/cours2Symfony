@@ -1,0 +1,21 @@
+{% set clients = clients|json_decode(true) %}
+
+<div>
+  {% if clients is not empty %}
+  <ul>
+    {% for client in clients %} {% if client.userId is empty %}
+    <li>
+      <strong>{{ client.Surname }}</strong>
+    </li>
+    <li>
+      <strong>{{ client.telephone }}</strong>
+    </li>
+    <li>
+      <strong>{{ client.adresse }}</strong>
+    </li>
+    {% endif %} {% endfor %}
+  </ul>
+  {% else %}
+  <p>Ce client n'a pas de compte.</p>
+  {% endif %}
+</div>

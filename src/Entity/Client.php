@@ -2,14 +2,16 @@
 
 namespace App\Entity;
 
-use App\Repository\ClientRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ClientRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
 
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
 //Validation du formulaire pour l'unicité
@@ -23,9 +25,11 @@ class Client
     private ?int $id = null;
 
     #[ORM\Column(length: 13,  unique: true)]
+    #[Groups(['clients'])]
     private ?string $telephone = null;
 
     #[ORM\Column(length: 50,  unique: true)]
+    #[Groups(['clients'])]
     //validation sur un entité si le formType est relier à l'entité
     #[Assert\NotBlank(
         message: 'Le surname du client est obligatoire',
@@ -33,22 +37,28 @@ class Client
     private ?string $Surname = null;
 
     #[ORM\Column(length: 100)]
+    #[Groups(['clients'])]
     private ?string $adresse = null;
 
     #[ORM\Column]
+    #[Groups(['clients'])]
     private ?\DateTimeImmutable $createAt = null;
 
     #[ORM\Column]
+    #[Groups(['clients'])]
     private ?\DateTimeImmutable $updateAt = null;
 
-    #[ORM\OneToOne(inversedBy: 'client', cascade: ['persist', 'remove'])]
-    private ?User $userId = null;
+   
 
     /**
      * @var Collection<int, Dette>
      */
     #[ORM\OneToMany(targetEntity: Dette::class, mappedBy: 'client', orphanRemoval: true, cascade:['persist'])]
+    #[MaxDepth(1)]
     private Collection $dettes;
+
+    #[ORM\OneToOne(mappedBy: 'cient', cascade: ['persist', 'remove'])]
+    private ?User $userId = null;
 
     public function __construct()
     {
@@ -122,17 +132,7 @@ class Client
         return $this;
     }
 
-    public function getUserId(): ?User
-    {
-        return $this->userId;
-    }
-
-    public function setUserId(?User $userId): static
-    {
-        $this->userId = $userId;
-
-        return $this;
-    }
+  
 
     /**
      * @return Collection<int, Dette>
@@ -160,6 +160,28 @@ class Client
                 $dette->setClient(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUserId(): ?User
+    {
+        return $this->userId;
+    }
+
+    public function setUserId(?User $userId): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($userId === null && $this->userId !== null) {
+            $this->userId->setCient(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($userId !== null && $userId->getCient() !== $this) {
+            $userId->setCient($this);
+        }
+
+        $this->userId = $userId;
 
         return $this;
     }

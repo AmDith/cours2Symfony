@@ -8,9 +8,12 @@
       {{ form_start(formInfoClient) }}
       {{ form_widget(formInfoClient) }}
       {{ form_end(formInfoClient) }}
-      {% if clients != '' %}
-      <twig:Form clients="{{ clients | raw }}" />
-      {% endif %}
+      {% if clients is not empty %}
+      <h3>Informations sur le client :</h3>
+      {% for client in clients %}
+      <p>Téléphone : {{ client.telephone }}</p>
+      <p>Surname : {{ client.Surname }}</p>
+      {% endfor %} {% endif %}
     </div>
   </div>
 </div>

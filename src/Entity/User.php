@@ -2,56 +2,61 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')]
-#[ORM\HasLifecycleCallbacks] // Indique que l'entité utilise des callbacks
-class User implements PasswordAuthenticatedUserInterface
+// #[ORM\Table(name: '`user`')]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_LOGIN', fields: ['login'])]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50)]
-    private ?string $nom = null;
-
-    #[ORM\Column(length: 50)]
-    private ?string $prenom = null;
-
-    #[ORM\Column(length: 100, unique: true)]
+    #[Assert\NotBlank(
+        message: 'Veuillez renseigner votre  login',
+    )]
+    #[ORM\Column(length: 180)]
     private ?string $login = null;
 
-    #[ORM\Column(length: 100)]
+    /**
+     * @var list<string> The user roles
+     */
+    #[ORM\Column]
+    private array $roles = [];
+
+    /**
+     * @var string The hashed password
+     */
+
+     #[Assert\NotBlank(
+        message: 'Veuillez renseigner votre  mot de passe',
+    )]
+    #[ORM\Column]
     private ?string $password = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $nom = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $prenom = null;
+
+    #[ORM\OneToOne(inversedBy: 'userId', cascade: ['persist', 'remove'])]
+    private ?Client $cient = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $isBlocked = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createAt = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $updateAt = null;
-
-    #[ORM\Column]
-    private ?bool $isBlocked = null;
-
-    #[ORM\OneToOne(mappedBy: 'userId', cascade: ['persist', 'remove'])]
-    private ?Client $client = null;
-
-    #[ORM\PrePersist] // Callback exécuté avant l'insertion en base
-    public function onPrePersist(): void
-    {
-        $this->createAt = new \DateTimeImmutable();
-        $this->updateAt = new \DateTimeImmutable();
-    }
-
-    #[ORM\PreUpdate] // Callback exécuté avant chaque mise à jour
-    public function onPreUpdate(): void
-    {
-        $this->updateAt = new \DateTimeImmutable();
-    }
 
     public function __construct()
     {
@@ -63,6 +68,76 @@ class User implements PasswordAuthenticatedUserInterface
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getLogin(): ?string
+    {
+        return $this->login;
+    }
+
+    public function setLogin(string $login): static
+    {
+        $this->login = $login;
+
+        return $this;
+    }
+
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->login;
+    }
+
+    /**
+     * @see UserInterface
+     *
+     * @return list<string>
+     */
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        // $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    /**
+     * @param list<string> $roles
+     */
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials(): void
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
     }
 
     public function getNom(): ?string
@@ -89,26 +164,26 @@ class User implements PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getLogin(): ?string
+    public function getCient(): ?Client
     {
-        return $this->login;
+        return $this->cient;
     }
 
-    public function setLogin(string $login): static
+    public function setCient(?Client $cient): static
     {
-        $this->login = $login;
+        $this->cient = $cient;
 
         return $this;
     }
 
-    public function getPassword(): ?string
+    public function isBlocked(): ?bool
     {
-        return $this->password;
+        return $this->isBlocked;
     }
 
-    public function setPassword(string $password): static
+    public function setBlocked(?bool $isBlocked): static
     {
-        $this->password = $password;
+        $this->isBlocked = $isBlocked;
 
         return $this;
     }
@@ -133,40 +208,6 @@ class User implements PasswordAuthenticatedUserInterface
     public function setUpdateAt(\DateTimeImmutable $updateAt): static
     {
         $this->updateAt = $updateAt;
-
-        return $this;
-    }
-
-    public function isBlocked(): ?bool
-    {
-        return $this->isBlocked;
-    }
-
-    public function setBlocked(bool $isBlocked): static
-    {
-        $this->isBlocked = $isBlocked;
-
-        return $this;
-    }
-
-    public function getClient(): ?Client
-    {
-        return $this->client;
-    }
-
-    public function setClient(?Client $client): static
-    {
-        // unset the owning side of the relation if necessary
-        if ($client === null && $this->client !== null) {
-            $this->client->setUserId(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($client !== null && $client->getUserId() !== $this) {
-            $client->setUserId($this);
-        }
-
-        $this->client = $client;
 
         return $this;
     }

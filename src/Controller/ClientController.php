@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\DTO\ClientDto;
 use App\Entity\Client;
 use App\Form\ClientType;
@@ -12,8 +13,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class ClientController extends AbstractController
 {
@@ -52,10 +54,22 @@ class ClientController extends AbstractController
             'maxPage' => $maxPage,
         ]);
     }
+
     //parametre facultative {va?}
     //on peut faire soite comme ça Route('/clients/search/telephone/{telephone}'
     //ou bien comme ça Route('/clients/search/telephone/{?tel=la_valeur}'
     //utilisation des path variables
+
+
+
+
+
+
+
+
+
+
+
     #[Route('/clients/show/{id?}', name: 'clients.show', methods: ['GET'])]
     public function show(int $id): Response
     {
@@ -65,13 +79,25 @@ class ClientController extends AbstractController
         ]);
     }
 
+
+
+
+
+
+
+
+
+
+
+
     
     //On utilise les query parenths pour faire la pagination et ça contient seulement 255 caractères
     //{} path variable
 
     //utilisation des query params
+    
     #[Route('/clients/search/telephone', name: 'clients.searchClientByTelephone', methods: ['GET','POST'])]
-    public function searchClientByTelephone(Request $request, ClientRepository $clientRepository,SessionInterface $session, ClientDto  $clientDto): Response
+    public function searchClientByTelephone(Request $request, ClientRepository $clientRepository, SerializerInterface $serializer, ClientDto  $clientDto): Response
     {
         //query=>$_GET
         //request=>$_POST
@@ -80,28 +106,63 @@ class ClientController extends AbstractController
         // $telephone = $request->query-> get('tel');
         // $clients = $clientRepository->findOneBy(['telephone' =>$request->request-> get('telephone')]);
 
-        //Récupérer le téléphone depuis la session
-        $telephone = $session->get('telephone');
         $clients = [];
-        $fieljson =  json_decode($telephone, true);
+        $jsonClients = null;
         $formInfoClient=$this->createForm(InfoClientType::class);
         $formInfoClient->handleRequest($request);
         if ($formInfoClient->isSubmitted($request) && $formInfoClient->isValid()) {
-            if ($telephone){
-                $clientDto->$this->telephone->setTelephone($formInfoClient->get('telephone')->getData());
-                $clients = $clientRepository->findOneBy($clientDto->$this->telephone->getTelephone());
-                $fieljson = $this->json([
-                    'status' => 'success',
-                    'clients' => $clients,
-                ]);
-            }
+            $clientDto->setTelephone($formInfoClient->get('telephone')->getData());
+            $clients = $clientRepository->findBy(['telephone' => $clientDto->getTelephone()]);
+            $jsonClients = $serializer->serialize($clients, 'json', ['groups' => 'clients']);
+            // dd($jsonClients);
          }
         return $this->render('client/form2.html.twig', [
             'formInfoClient' => $formInfoClient->createView(),
-            'clients' => $clients,
-            'fieljson' =>  $fieljson
+            'clients' => $jsonClients,
         ]);
     }
+
+
+
+
+
+
+    #[Route('/clients/search2/telephone', name: 'clients.searchClientByTelephone2', methods: ['GET','POST'])]
+    public function searchClientByTelephone2(Request $request, ClientRepository $clientRepository, ClientDto  $clientDto): Response
+    {
+        //query=>$_GET
+        //request=>$_POST
+        //$request->query-> get('key')=>$_GET['key']
+        //$request->request-> get('name_field')=>$_POST['name_field']
+        // $telephone = $request->query-> get('tel');
+        // $clients = $clientRepository->findOneBy(['telephone' =>$request->request-> get('telephone')]);
+
+        $clients = [];
+        $formInfoClient=$this->createForm(InfoClientType::class);
+        $formInfoClient->handleRequest($request);
+        if ($formInfoClient->isSubmitted($request) && $formInfoClient->isValid()) {
+            $clientDto->setTelephone($formInfoClient->get('telephone')->getData());
+            $clients = $clientRepository->findBy(['telephone' => $clientDto->getTelephone()]);
+            // dd($jsonClients);
+         }
+        return $this->render('client/form3.html.twig', [
+            'formInfoClient' => $formInfoClient->createView(),
+            'clients' => $clients,
+        ]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     #[Route('/clients/remove/{id?}', name: 'clients.remove', methods: ['GET'])]
@@ -115,28 +176,65 @@ class ClientController extends AbstractController
 
     //si on met rien au niveau de #[Route('/clients/store', name: 'clients.store')] 
     //ça veut dire cette méthode peut être appelée par POST ou GET
-    #[Route('/clients/store', name: 'clients.store', methods: ['GET', 'POST'])]
-    public function store(Request $request, EntityManagerInterface $entityManager): Response
-    {
+    // #[Route('/clients/store', name: 'clients.store', methods: ['GET', 'POST'])]
+    // public function store(Request $request, EntityManagerInterface $entityManager): Response
+    // {
         
-        $client = new Client();
-        //Association de l'objet client  au Formulaire
-        $form=$this->createForm(ClientType::class, $client);
-        //Récupération des données du formulaire
-        $form->handleRequest($request);
+    //     $client = new Client();
+    //     //Association de l'objet client  au Formulaire
+    //     $form=$this->createForm(ClientType::class, $client);
+    //     //Récupération des données du formulaire
+    //     $form->handleRequest($request);
        
+    //     if ($form->isSubmitted() && $form->isValid()) {
+    //         // il est bon de faire l'instanciation de create-At et update_At dans le constructeur
+    //         // $client->setCreateAt(new \DateTimeImmutable());
+    //         // $client->setUpdateAt(new \DateTimeImmutable());
+
+    //         $entityManager->persist($client);//Stocker en mémoire mais n'est pas encore exécuté au niveau de la base de donnée
+    //         $entityManager->flush();//exécute la requête en base de donnée et est l'équivalent du commit en java
+
+    //         return $this->redirectToRoute('clients.index');
+    //     }
+    //     return $this->render('client/form.html.twig', [
+    //         'formClient' => $form->createView(),
+    //     ]);
+    // }
+
+
+
+    #[Route('/clients/store', name: 'clients.store', methods: ['GET', 'POST'])]
+    public function store(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $encoder): Response
+    {
+        $client = new Client();
+        $client->setUserId(new User());
+        // Association de l'objet client au Formulaire
+        $form = $this->createForm(ClientType::class, $client);
+        // Récupération des données du formulaire
+        $form->handleRequest($request);
+        // Si le formulaire est soumis et valide
         if ($form->isSubmitted() && $form->isValid()) {
-            // il est bon de faire l'instanciation de create-At et update_At dans le constructeur
-            // $client->setCreateAt(new \DateTimeImmutable());
-            // $client->setUpdateAt(new \DateTimeImmutable());
+            if (!$form->get('addUser')->getData()) {
+                // Ajout d'un utilisateur avec le client
+                $client->setUserId(null);
+                
+            }
+            else{
+                $user = $client->getUserId();
+                $hashedPassword = $encoder->hashPassword($user , $user->getPassword());
+                $user->setPassword($hashedPassword);
+            }
 
-            $entityManager->persist($client);//Stocker en mémoire mais n'est pas encore exécuté au niveau de la base de donnée
-            $entityManager->flush();//exécute la requête en base de donnée et est l'équivalent du commit en java
+            $entityManager->persist($client);
+            // Executer la requête
+            $entityManager->flush(); // commit the changes
 
+            // Redirection vers la liste des clients
             return $this->redirectToRoute('clients.index');
         }
         return $this->render('client/form.html.twig', [
             'formClient' => $form->createView(),
         ]);
     }
+
 }
